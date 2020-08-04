@@ -1,0 +1,143 @@
+1. what is dispatcher servlet?
+SpringBootAutoConfiguration : 
+ DispatcherServletAutoConfiguration matched:
+	found the class called DispatcherServlet. org.springframework.web.servlet.DispatcherServlet in class path
+ ErrorMvcAutoConfiguration matched:
+  configure error page.
+  HttpMessageConvertersAutoConfiguration matched:
+		coverts https message.
+  JacksonAutoConfiguration Matched:
+		it converts JSON to Beans or Beans to JSON.
+		
+2. Who is configuration dispatcher servlet?
+	SpringBootAutoConfiguration configure the Dispatcher Servlet
+	
+3. How does the Bean converted to JSON?
+	because SpringBootAutoConfiguration has internally JacksonAutoConfiguration and it converts to Bean to JSON or JSON to Bean.
+
+4. Who is configuraing the error mapping?
+	SpringBootAutoConfiguration has internally ErrorMvcAutoConfiguration and it configure the error message.
+	
+5. DispatcherServlet?
+ Its follow the FrontController Web MVC pattern. It takes the request and find out which contrroller
+ to call or execute with the method name. It takes the data and RestController consists of ResponseBody so it takes data 
+ and convert into JSON format(due to JacksonAutoConfiguration)
+ 
+ 6. Path Variable or Path parameters(@PathVariable):
+  Use the PathVariable for adding the value in the method from request.
+  Example: 
+  @GetMapping(path ="hello/{name}")
+  public BeanClass  methodVariable(@PathVariable String name){
+		retrun BeanClass("Hello: " + name)
+  }
+ 7. @Component annotations:
+  USe for data base. Use findAll(), save(), findOne() etc. method for get or update the data from DataBase
+  
+ 8. spring.jackson.serialization.writes-dates-as-timestamp=false:
+ converts the date into date format not in the time stamps.
+ 
+ 9. @RequestBody:
+ This annotaion map the data with the request .
+ example:
+ @PostMapping("/users")
+ public void createUser(@RequestBody User user){
+	User savedUser=service.save(user);
+
+ }
+ 
+ 10. Created the status and location:
+	Use ResponseEntity for create the status and location.
+	Example:
+	@PostMapping("/users")
+	public Responseentity<Object> createdUser(@RequestBody User user){
+	User savedUser=service.save(user);
+	
+	URI location= ServletUriComponentsBuilder
+					.fromCurrentRequest()
+					.path({id})
+					.buildAndExpand(savedUser.getId()).toUri();
+	
+	return ResponseEntity.created(location).build();
+	
+	}
+ 
+ It returns 201 created status and location with URI details
+ 
+ 11. Implementing Exception Handling in REST Services:
+ 
+ Create a class and add the @ResponseStatus with the code. and throw this exception from controller.
+ Example:
+ @ResponseStatus(HttpStatus.NOT_FOUND)
+ public class userNotFoundException extends RuntimeException{
+ constructor
+ }
+ 
+ 12. @ControllerAdvice:
+ use for customsie the Excpetions.
+ 
+ 13. @ExceptionHandler:
+ handle the excpetion 
+ Example:
+ @ExceptionHandler(UserNotFoundException.class)
+ public final ResponseEntity<>handlerUserNotFoundException(UserNotFoundException ex, WebRequest request){
+ 
+	ExceptionResponse exceptionResponse=new ExceptionResponse(new Date(),ex.getMessage(),
+										request.getDescription(false));
+	
+	return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
+	
+14. Validation for Beans:
+	@Valid annotaion use for validation
+	
+	Example:
+	@Size(min=2, message="name should be atleast 2 characters")
+	String name
+	
+	for customization overide the method handleMethodArgumentNotValid() in the class
+	
+15. HATEOAS implementation:
+	HATEOS is used for adding or providing the link.
+	
+16. Change the language Internationlization:
+	1. create the message_er.properties and message_germ.properties.
+	2. There are 2 way 
+	(i) spring.messages.basename=messages
+	or
+	(ii)create ResoursceBundleMessageSource bundleMessageSource() method in main application class:
+	Example:
+	@Bean
+	public ResoursceBundleMessageSource bundleMessageSource(){
+	ResoursceBundleMessageSource messageSource=new ResoursceBundleMessageSource();
+	messageSource.setbaseName("messages");
+	return messageSource;
+	}
+	
+	3. MessageSource in the cotroller class:
+	@Autowired
+	MessageSource messageSource;
+	@GetMapping(path="/helloLanguage")
+	public String languageTest(){
+	
+			return messageSource.getMessage("String of properties file", null, LocaleContextHolder.getLocate() );
+		
+	}
+	
+	4. Set Locale Resolver default in application main class:
+	@Bean
+	public LocaleResolver localeResolver(){
+	AcceptHeaderLocalResolver localResolver=new AcceptHeaderLocalResolver();
+	localResolver.setDefaultLocate(Local.US);
+	return localResolver
+	}  
+ }
+ 
+ 17. SWAGER:
+	use for documentation.
+	
+ 18. @ConfigurationProperties:
+		Use for read the properties files.
+		Example:
+		@ConfigurationProperties(value)
+		class Configuration{
+		}
+		

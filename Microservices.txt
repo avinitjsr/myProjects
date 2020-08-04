@@ -1,0 +1,231 @@
+https://github.com/in28minutes/spring-microservices
+1.MicroServices:
+ Services which expose by 
+	REST
+	Small well chosen deployable units
+	Cloud Enabled
+
+2. Challanges:
+ 1. Bounded Context
+ 2. Configuration Management
+ 3. Dynamic Scale up and Scale Down
+ 4. Visiblity
+ 
+3. Spring Cloud:
+	SpringCloudConfigServer: upload the services on common repository like GIT.
+
+4. Nameing Server:
+	All the instaces of MicroServices is registered on Naming Server.
+	Eureka is the nameing server.
+	Example: CalculationService and ExchangeService is registerd on Naming Server.
+	CalculationService ask from Naming server give me the instance of ExchangeService and Naming Server provide the url of 
+	instance of ExchangeService.
+	2 importnant features of Naming Server:
+	1. Service Registration
+	2. Service Discovery
+	
+5. Ribbon:
+	Ribbon use for client side load balancing. 
+	
+6. Feign:
+	Feign is used for write Rest Clients.
+	
+7. API Gateway:
+	Netflix API gateway: API Gateway use for implement common fetures of Micriservices example: Login, Logout, Message etc.
+
+8. Hystrix:
+	If service is down Hystrix use for configure default response. It is also called Fault Tolerance.
+	
+9. Microservices Advantage:
+	1. Enable to adpat New Technology. 
+		Example: Microservices will be in any language like Java, Node JS, etc.
+	2. Dynamic Scaling:
+		Sclae up or Scale down based on the load.
+	3. Fatser Release Cycles.
+	
+10.Cloud config Server project:
+		Required Config Server as dependency
+
+11. Add spring clod config server in GIT repository:
+		add in properties file:
+			spring.cloud.config.server.git.uri=file:////path of git local folder
+
+12. @EnabledConfigServer:
+		Add this annotation in main class for adding config server
+
+13. For connecting to LimitService to SpringCloudConfigServer:
+		1. change the name of application.properties to bootstrap.properties files.
+		2. Add service name: apring.application.name=limit-service	in bootstrap.properties
+		3. Add spring.cloud.config.uri=http://localhost:8888 in bootstrap.properties file
+		4. for add the apecific profile in bootstrap.properties file:
+			spring.profile.active=dev
+14. For creating moreinstances of microservices:
+		1. add the serverport=portnumber in VM arguments.
+			example: -Dserver.port=8001
+			and run this instance then 2 instance of the services will run at same time.
+15. For JPA databese:
+		1. add the dependency starter-data-jpa
+		2. for show the query add spring.jpa.show-sql=true
+								spring.h2.console.enabled=true
+								
+16. RestTemplate:
+		REstTemplate use for connect to other services.
+		ResponseEntity<BeanName> responseEntity= new ReponseTemplate(
+													"url", bean.class, variable);
+
+17. Feign: 
+		This is another way to called restclient or communicate with other MicroServices:
+		1. Add dependency in pom.xml like:
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-feign</artifactId>
+			</dependency>
+		2. Enable Feign add @EnableFeignClients in the main class.
+		3. create a proxy interface for FeignClient
+			@FeignClient(name="application name", url="which application has to connect")
+			interface CurrencyExchangeProxy{
+			}
+			
+18. Ribbon:
+		Use for client side load balancing.
+		1. Add dependency in pom.xml like:
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-ribbon</artifactId>
+			</dependency>
+		2. Add @RibbonClient(name="application name") in the proxy interface.
+		3. Add listofServer in application.properties file of currency-conversion-services
+			currency-exchange-service.ribbon.listOfServers=http://localhost:8080,
+															http://localhost:8081
+		   We have added 2 instyance of servers in properties file
+		   
+19. eureka Naming Server:
+		1. create the spring-oot project for Eureka Naming server and add the below dependecies:
+					Eureka Server
+					Config Client
+					Actuator
+					DevTools
+		2. Add @EnableEurekaServer annotation in spring-boot main class.
+		3. Default port number for Eureka Server is 8761.
+		4. Add the eureka dependecies in the pom.xml which service we have to add with Eureka.
+			example: currency-exchange-service and currency-calculation-service has to add woth Eureka
+					 so add eureka dependency in their pom.xml
+		5. Add @EnabelDiscoveryClient annotation in the currency-exchange-service and currency-calculation-service 
+			spring-boot main class.
+		6. Open application.properties file of Services and add eureka url
+			eureka.client.service-url.default-zone=http://localhost:8761/eureka
+			
+20. Configure Ribbon and Eureka:
+	After the configure Eureka and Ribbon for services remove all hard coded server information from services properties file.
+	It will run directly with Nameing-Server Eureka.
+	
+21. API Gateway importnace:
+	Authentication, authorization, security
+	Rate limits
+	Fautlt Tolerance
+	Service Aggregation
+
+22. Zuul API Gateway:
+		1. Provide by Netflix.
+		2. for Zuul API gateways project add the depencies Zuul, Eureka Discovery, Actuator and DevTools
+		3. Add @EnableZuulProxy and @EnableDiscoveryClient annotation in the main class for Zuul api
+		4. Open application.properties file of Services and add eureka url
+			eureka.client.service-url.default-zone=http://localhost:8761/eureka
+		5. Services connecting with Zuul APIs add Zuul name in FeignClient in proxy class instead of exchange service.
+			Example: @FeignClient("Zuul-api-gateway")
+			
+23. Distributed Tracing:
+		There are lot of microservices running and if fails due to one microservices
+		then for finding which one microservices has problem we use Distributed Tracing.
+		1. Spring Cloud Sleuth with Zipkin use for Distributed Tracing.
+		2. We pass Unique ID with the Rabbit MQ 
+		
+24. Spring Cloud Sleuth:
+		Adding Spring cloud sleuth in
+		existing services:
+			1. add depencies in pom.xml
+				<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-sleuth</artifactId>
+			</dependency>
+			2. Add AlwaysSimpler in main class.
+			3. Add looger in controller class.
+			4. Spring cloud Sleuth add unique id in request.
+	
+25. Rabbit MQ:
+		1. Before install Rabbit MQ install ERLang then install Rabbit MQ.
+		2. All microservices put the trace messages in Rabbit MQ.
+		3. Zipkin Distributed Tracing Server trace from Rabbit MQ.
+		4. Download tye zipkins server and start with command promt:
+			RABBIT_URI=amqp://localhost java -jar zipkin-server-2.5.2-exec.jar
+		5. Add dependenies for zipkin and Rabbit MQ in the services zuul-app-gateway, currency-exchange, currency-calculation-service etc.
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+			</dependency>
+			
+		6. open the zipkins url and traces. We can see the details of services.
+		
+26. SpringCloud config server BUS:
+		1. One url for all the instances of microservices will refresh.
+		2. For this we use Rabbit MQ .
+		3. Add this in Spring-cloud-config pom .xml
+		<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+			</dependency>
+		4. call ine main instance with BUS using POST all services will refresh.
+		
+27. Fault Tolerence with Hystrix:
+		1. Many microservices connecting each other and If one Microservices stop to work then other will also.
+		 For this problem Fault Tolerence with Hystrix provide some default value so other services will not stoped.
+		2. Add depencies Hystrix in Microservices pom.xml
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-hysterix</artifactId>
+			</dependency>
+		3. @EnabledHystrix in main class
+		4. Add @HystrixCommand(fallbackMethod="fallbackRetreiveConfiguration") annotation in all controller class method 
+		5. Create fallbackRetreiveConfiguration method in the controller and return default value.
+		
+		
+		Note:The dependencies are ever-changing with Spring Cloud and Spring Boot.
+
+If you are using Spring Boot Release >= 2.1.*, you would need to use spring-cloud-starter-zipkin and spring-rabbit instead of spring-cloud-sleuth-zipkin and spring-cloud-starter-bus-amqp.
+
+You would need to make this change in THREE pom.xmls - in currency-conversion-service, currency-exchange-service, and zuul-api-gateway projects
+
+New Dependencies
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-zipkin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
+		</dependency>
+OLD Dependencies to be Replaced
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+		</dependency>
+ 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+		</dependency>
+		
+			
+
+			
+	
+
+		
+		
