@@ -1,0 +1,100 @@
+package WySpaceQuestion;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class FileReaderTest {
+
+    List<String> usedTimeFrame = new ArrayList<String>();
+
+    public void readFile() {
+        String fileName = "C://Users//zux090//avinash//pass-schedule.txt";
+
+
+        try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+
+            List<String> list = stream.collect(Collectors.toList());
+            for (String str : list) {
+                String data[] = str.split(",");
+                String name = data[0];
+                String period = data[1];
+                String startTime = data[2];
+                String endTime = data[3];
+
+                List<String> tFrame = timeFrame(startTime, endTime);
+                int count = 0;
+                int periodInt = Integer.parseInt(period);
+                if (periodInt > tFrame.size()) {
+                    periodInt = tFrame.size();
+                }
+                for (int i = 0; i < tFrame.size(); i++) {
+                    if (usedTimeFrame.contains(tFrame.get(i))) {
+
+                    } else {
+                        usedTimeFrame.add(tFrame.get(i));
+                        count++;
+                        if (count == periodInt) {
+                            break;
+                        }
+                    }
+
+                }
+                if (count == periodInt) {
+                    System.out.println(name + " All period used");
+                } else {
+                    System.out.println((periodInt - count) + " Period Not available for " + name);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<String> timeFrame(String str1, String str2) {
+        List<String> tFrame = new ArrayList<String>();
+        try {
+
+            DateFormat df = new SimpleDateFormat("HH:mm");
+            Date d1 = df.parse(str1);
+            Calendar c = Calendar.getInstance();
+            c.setTime(d1);
+            c.add(Calendar.MINUTE, 30);
+            tFrame.add(str1);
+
+
+            for (int i = 0; i <= 48; i++) {
+                Date d2 = c.getTime();
+                String str = df.format(d2);
+                tFrame.add(str);
+                c.setTime(d2);
+                c.add(Calendar.MINUTE, 30);
+                if (str.equalsIgnoreCase(str2)) {
+                    break;
+                }
+            }
+
+
+        } catch (Exception ex) {
+
+        }
+        return tFrame;
+
+    }
+
+    public static void main(String[] args) {
+        FileReaderTest test = new FileReaderTest();
+        test.readFile();
+        System.out.println(test.usedTimeFrame);
+
+    }
+}
