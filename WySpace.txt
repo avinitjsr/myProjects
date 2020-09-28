@@ -16,9 +16,7 @@ public class FileReaderTest {
 
     List<String> usedTimeFrame = new ArrayList<String>();
 
-    public void readFile() {
-        String fileName = "C://Users//zux090//avinash//pass-schedule.txt";
-
+    public void readFile(String fileName) {
 
         try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 
@@ -49,9 +47,9 @@ public class FileReaderTest {
 
                 }
                 if (count == periodInt) {
-                    System.out.println(name + " All period used");
+                    System.out.println(" Ground Station has the bandwidth to support all period for '" + name + "'");
                 } else {
-                    System.out.println((periodInt - count) + " Period Not available for " + name);
+                    System.out.println(" Ground Station has not bandwidth to support '" + (periodInt - count) + "' period for '" + name + "'");
                 }
             }
 
@@ -85,7 +83,7 @@ public class FileReaderTest {
 
 
         } catch (Exception ex) {
-
+            ex.printStackTrace();
         }
         return tFrame;
 
@@ -93,8 +91,16 @@ public class FileReaderTest {
 
     public static void main(String[] args) {
         FileReaderTest test = new FileReaderTest();
-        test.readFile();
-        System.out.println(test.usedTimeFrame);
+
+        if (null != args && args.length > 0 && null != args[0]) {
+            String path = args[0];
+            test.readFile(path);
+            System.out.println("Used Bandwith for 24th Hour time Period: ");
+            System.out.println(test.usedTimeFrame);
+        } else {
+            System.out.println("Please provide the passed schedule file in argument ");
+        }
+
 
     }
 }
